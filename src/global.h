@@ -45,7 +45,7 @@
 
 #define I_ATTEMPTS 4
 
-#define DEBUG
+//#define DEBUG
 
 #define PADS_SIGNATURE_LIST "pads-signature-list"
 #define PADS_ETHER_CODES "pads-ether-codes"
