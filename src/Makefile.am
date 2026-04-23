@@ -12,7 +12,7 @@ pads_SOURCES = pads.c pads.h \
                util.c util.h \
                global.h
 pads_LDFLAGS = -pthread
-pads_LDADD = $(top_srcdir)/lib/bstring/libbstring.a output/liboutput.a
+pads_LDADD = $(top_srcdir)/lib/bstring/libbstring.a output/liboutput.a $(EXTRA_LIBS)
 bin_SCRIPTS = pads-report
 
 EXTRA_DIST = pads-report.pl
