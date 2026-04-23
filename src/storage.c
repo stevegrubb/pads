@@ -24,7 +24,10 @@
  * $Id: storage.c,v 1.3 2005/02/16 01:47:35 mattshelton Exp $
  *
  **************************************************************************/
+#include <arpa/inet.h>
+#include <netinet/ether.h>
 #include "storage.h"
+#include "mac-resolution.h"
 
 Asset *asset_list;
 ArpAsset *arp_asset_list;
@@ -400,7 +403,7 @@ inline Asset *
 find_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto)
 {
     Asset *list;
-    Asset *rec;
+    Asset *rec = NULL;
 
     list = asset_list;
 
@@ -469,7 +472,7 @@ void print_database ()
     while (rec != NULL) {
 	printf("%d:  %s,%d,%d,%d,%s,%s,%d\n",
 		id, inet_ntoa(rec->ip_addr), ntohs(rec->port),
-		rec->proto, rec->discovered,
+		rec->proto, (int)rec->discovered,
 		bdata(rec->service), bdata(rec->application),
 		rec->i_attempts);
 	rec = rec->next;
@@ -482,7 +485,7 @@ void print_database ()
     arp = arp_asset_list;
     while (arp != NULL) {
 	printf("%d:  %s,%s,%d\n", id, inet_ntoa(arp->ip_addr),
-		ether_ntoa(&arp->mac_addr), arp->discovered);
+		ether_ntoa((struct ether_addr *)arp->mac_addr), (int)arp->discovered);
 	arp = arp->next;
 	id++;
     }

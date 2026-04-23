@@ -26,6 +26,10 @@
  *
  **************************************************************************/
 #include "output.h"
+#include "output-screen.h"
+#include "output-csv.h"
+#include "output-fifo.h"
+#include "storage.h"
 
 /* Global Variables */
 OutputPluginList *output_plugin_list;
@@ -149,7 +153,7 @@ int print_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto)
 
     /* Make sure that a record was found. */
     if (rec == NULL)
-	return;
+	return -1;
 
     /* Cycle through output plugins and print to those that are active. */
     head = output_plugin_list;
@@ -182,7 +186,7 @@ int print_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN])
 
     /* Find Asset */
     ArpAsset *list;
-    ArpAsset *rec;
+    ArpAsset *rec = NULL;
 
     list = (ArpAsset *)get_arp_pointer();
     while (list != NULL) {
@@ -199,7 +203,7 @@ int print_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN])
 
     /* Make sure that a record was found. */
     if (rec == NULL)
-	return;
+	return -1;
 
     /* Cycle through output plugins and print to those that are active. */
     head = output_plugin_list;
@@ -298,8 +302,8 @@ void end_output (void)
 #ifdef DEBUG
 int debug_output_list (void)
 {
-    OutputPluginList *head, *head2;
-    OutputPlugin *tmp, *tmp2;
+    OutputPluginList *head;
+    OutputPlugin *tmp;
     int i = 1;
 
     printf("output_plugin_list:\n");

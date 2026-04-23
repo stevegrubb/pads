@@ -25,6 +25,9 @@
  * $Id: global.h,v 1.7 2005/04/27 13:45:47 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef GLOBAL_HEADER
+#define GLOBAL_HEADER
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -68,6 +71,7 @@
 #include <netinet/if_ether.h>
 #include <pcap.h>
 #include <pcre.h>
+#include <time.h>
 
 #include "bstring/bstrlib.h"
 
@@ -160,3 +164,6 @@ extern GC gc;
 
 /* vim:expandtab:cindent:smartindent:ts=4:tw=0:sw=4:
  */
+
+#endif
+

@@ -25,6 +25,8 @@
  * $Id: output-csv.h,v 1.3 2005/02/18 05:39:09 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef OUTPUT_CSV_HEADER
+#define OUTPUT_CSV_HEADER
 
 /* DEFINES ----------------------------------------- */
 #ifdef LINUX
@@ -63,4 +65,6 @@ int parse_raw_report (bstring line);
 int print_asset_csv (Asset *rec);
 int print_arp_asset_csv (ArpAsset *rec);
 int end_output_csv (void);
+
+#endif
 

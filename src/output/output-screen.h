@@ -25,6 +25,8 @@
  * $Id: output-screen.h,v 1.3 2005/02/18 05:39:09 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef OUTPUT_SCREEN_HEADER
+#define OUTPUT_SCREEN_HEADER
 
 /* DEFINES ----------------------------------------- */
 #ifdef LINUX
@@ -43,16 +45,12 @@
 #include "output.h"
 
 
-/* TYPEDEFS ---------------------------------------- */
-typedef struct _OutputCSVConf
-{
-    FILE *file;
-} OutputCSVConf;
-
-
 /* PROTOTYPES -------------------------------------- */
 int setup_output_screen (void);
 int init_output_screen (bstring args);
 int print_asset_screen (Asset *rec);
 int print_arp_asset_screen (ArpAsset *rec);
 int end_output_screen (void);
+
+#endif
+

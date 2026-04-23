@@ -32,6 +32,7 @@
 #ifndef DISABLE_VENDOR
 
 #include "mac-resolution.h"
+#include "util.h"
 
 Vendor *vendor_list = NULL;
 
@@ -60,7 +61,7 @@ int init_mac_resolution (void) {
     }
 
     /* Open Signature File */
-    if ((fp = fopen(bdata(filename), "r")) == NULL) {
+    if ((fp = fopen((char *)bdata(filename), "r")) == NULL) {
         err_message("Unable to open MAC resolution file - %s", bdata(filename));
     }
 
@@ -79,7 +80,7 @@ int init_mac_resolution (void) {
         bdestroy(filedata);
     if (lines != NULL)
         bstrListDestroy(lines);
-    close(fp);
+    fclose(fp);
 
     return 0;
 }
@@ -99,10 +100,8 @@ int parse_raw_mac (bstring line)
     char vendor[80];
     int m1, m2, m3;
 
-    int pos;
-
     /* Parse out the contents of the line. */
-    if (sscanf(bdata(line), "%02X:%02X:%02X %80[^,\n],\n", &m1, &m2, &m3, vendor) != 4)
+    if (sscanf((char *)bdata(line), "%02X:%02X:%02X %80[^,\n],\n", &m1, &m2, &m3, vendor) != 4)
         return -1;
 
     mac[0] = (char) (m1);
@@ -215,7 +214,7 @@ void show_vendor (void){
     list = vendor_list;
 
     while(list != NULL) {
-        printf("Mac: %s\nVendor: %s\n\n", list->mac, bdata(list->vendor));
+        printf("Mac: %u\nVendor: %s\n\n", list->mac, bdata(list->vendor));
         list = list->next;
     }
 }

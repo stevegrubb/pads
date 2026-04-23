@@ -26,6 +26,13 @@
  *
  **************************************************************************/
 #include "pads.h"
+#include "util.h"
+#include "storage.h"
+#include "output/output.h"
+#include "identification.h"
+#include "mac-resolution.h"
+#include "monnet.h"
+#include "configuration.h"
 
 /* Variable Declarations */
 GC gc;                                  /* Global Configuration */
@@ -33,6 +40,9 @@ char errbuf[PCAP_ERRBUF_SIZE];
 proc_t processor;
 char **prog_argv;
 int prog_argc;
+
+/* Function Declarations */
+static int process_cmdline (int argc, char *argv[]);
 
 /* ----------------------------------------------------------
  * FUNCTION     : process_pkt
@@ -210,7 +220,7 @@ main_pads (void)
     if (gc.pcap_file) {
         /* Read from PCAP file specified by '-r' switch. */
         log_message("Reading from file %s\n", bdata(gc.pcap_file));
-        if (!(gc.handle = pcap_open_offline(bdata(gc.pcap_file), errbuf))) {
+        if (!(gc.handle = pcap_open_offline((char *)bdata(gc.pcap_file), errbuf))) {
             err_message("Unable to open %s.  (%s)", bdata(gc.pcap_file), errbuf);
         }
 
@@ -268,7 +278,7 @@ main_pads (void)
     /* Open banner dump file if specified (-d). */
     if (gc.dump_file) {
         verbose_message("Opening Banner Dump File");
-        if (!(gc.dumper = pcap_dump_open(gc.handle, bdata(gc.dump_file))))
+        if (!(gc.dumper = pcap_dump_open(gc.handle, (char *)bdata(gc.dump_file))))
             err_message("Cannot open dump file - %s\n", pcap_geterr(gc.handle));
     }
 
@@ -323,7 +333,7 @@ end_pads(void)
 
     /* Remove PID File */
     if (gc.daemon_mode == 1)
-        if ((unlink(bdata(gc.pid_file))) != 0)
+        if ((unlink((char *)bdata(gc.pid_file))) != 0)
             log_message("WARNING:  Unable to remove PID file - %s\n", bdata(gc.pid_file));
 
     /* End Modules */
@@ -370,7 +380,7 @@ end_pads(void)
  * RETURN       : 0 - Success
  *              : -1 - Error
  * ---------------------------------------------------------- */
-int
+static int
 process_cmdline (int argc, char *argv[])
 {
     int ch;
@@ -477,11 +487,6 @@ sig_hup_handler(int signal)
 int
 main(int argc, char *argv[])
 {
-    /* Variables */
-    int i;
-    struct pcap_pkthdr header;      /* The header that pcap gives us */
-    const u_char *packet;           /* The actual packet */
-
     /* Copy Command Line Args */
     prog_argc = argc;
     prog_argv = argv;

@@ -25,6 +25,8 @@
  * $Id: output-fifo.h,v 1.3 2005/02/18 05:39:09 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef OUTPUT_FIFO_HEADER
+#define OUTPUT_FIFO_HEADER
 
 /* DEFINES ----------------------------------------- */
 #ifdef LINUX
@@ -56,9 +58,11 @@ typedef struct _OutputFIFOConf
 
 
 /* PROTOTYPES -------------------------------------- */
+int setup_output_fifo (void);
 int init_output_fifo (bstring fifo_file);
 int print_asset_fifo (Asset *rec);
 int print_arp_asset_fifo (ArpAsset *rec);
 int print_stat_fifo (Asset *rec);
 int end_output_fifo (void);
 
+#endif

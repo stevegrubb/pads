@@ -25,8 +25,10 @@
  * $Id: util.c,v 1.6 2005/03/11 01:31:15 mattshelton Exp $
  *
  **************************************************************************/
+#include <unistd.h>
+#include <ctype.h>
 #include "util.h"
-
+#include "pads.h"
 
 /* ----------------------------------------------------------
  * FUNCTION     : strip_comment
@@ -60,11 +62,12 @@ strip_comment (char *string)
 int
 chomp (char *string, int size)
 {
-    for (size; size >= 0; size--) {
+    while (size >= 0) {
         if (string[size] == '\n') {
             string[size] = '\0';
             return 1;
         }
+        size--;
     }
 
     return 0;
@@ -121,7 +124,7 @@ init_pid_file (bstring pid_file, bstring user, bstring group)
         gc.pid_file = bfromcstr("/var/run/pads.pid");
 
     /* Create PID File */
-    if ((fp = fopen(bdata(gc.pid_file), "w")) != NULL) {
+    if ((fp = fopen((char *)bdata(gc.pid_file), "w")) != NULL) {
         pid = (int) getpid();
         fprintf(fp, "%d\n", pid);
         fclose(fp);
@@ -133,11 +136,11 @@ init_pid_file (bstring pid_file, bstring user, bstring group)
     if (user == NULL || group == NULL)
         return;
 
-    if ((this_group = getgrnam(bdata(group))) == NULL)
+    if ((this_group = getgrnam((char *)bdata(group))) == NULL)
         err_message("'%s' group does not appear to exist.", bdata(group));
-    if ((this_user = getpwnam(bdata(user))) == NULL)
+    if ((this_user = getpwnam((char *)bdata(user))) == NULL)
         err_message("'%s' user does not appear to exist.", bdata(user));
-    if ((chown(pid_file, this_user->pw_uid, this_group->gr_gid)) != 0)
+    if ((chown((char *)bdata(pid_file), this_user->pw_uid, this_group->gr_gid)) != 0)
         err_message("Unable to change PID file's ownership.");
 
 }
@@ -343,7 +346,7 @@ strlcpy(char *dst, const char *src, size_t size) {
 size_t
 strlcat(char *dst, const char *src, size_t len) {
   char       *dstptr = dst;
-  size_t     dstlen, tocopy;
+  size_t     dstlen, tocopy = len;
   const char *srcptr = src;
 
   while (tocopy-- && *dstptr) dstptr++;
@@ -384,10 +387,10 @@ drop_privs (bstring newuser, bstring newgroup)
     if (newuser == NULL || newgroup == NULL)
         return;
 
-    if ((this_group = getgrnam(bdata(newgroup))) == NULL)
+    if ((this_group = getgrnam((char *)bdata(newgroup))) == NULL)
         err_message("'%s' group does not appear to exist.", bdata(newgroup));
 
-    if ((this_user = getpwnam(bdata(newuser))) == NULL)
+    if ((this_user = getpwnam((char *)bdata(newuser))) == NULL)
         err_message("'%s' user does not appear to exist.", bdata(newuser));
 
     /* Set Group */
@@ -458,7 +461,7 @@ mac2hex(const char *mac, char *dst, int len)
  * RETURN       : 0 - MAC Address String
  * ---------------------------------------------------------- */
 char *
-hex2mac(unsigned const char *mac)
+hex2mac(const char *mac)
 {
     static char buf[18];
 

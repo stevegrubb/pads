@@ -26,6 +26,9 @@
  *
  **************************************************************************/
 #include "configuration.h"
+#include "util.h"
+#include "bstring/util.h"
+#include "monnet.h"
 
 /* Variable Declarations */
 
@@ -44,7 +47,7 @@ void init_configuration (bstring filename) {
 
     verbose_message("config - Processing '%s'.", bdata(filename));
 
-    if ((fp = fopen(bdata(filename), "r")) == NULL) {
+    if ((fp = fopen((char *)bdata(filename), "r")) == NULL) {
         err_message("Unable to open configuration file - %s", bdata(filename));
     }
 
@@ -59,7 +62,7 @@ void init_configuration (bstring filename) {
     /* Clean Up */
     bdestroy(filedata);
     bstrListDestroy(lines);
-    close(fp);
+    fclose(fp);
 }
 
 /* ----------------------------------------------------------
@@ -147,7 +150,7 @@ void parse_line (bstring line)
 
     } else if ((biseqcstr(param, "network")) == 1) {
         /* NETWORK */
-        parse_networks(bdata(value));
+        parse_networks((char *)bdata(value));
 
     }
 

@@ -25,7 +25,9 @@
  * $Id: output-fifo.c,v 1.6 2005/02/22 16:09:25 mattshelton Exp $
  *
  **************************************************************************/
+#include <arpa/inet.h>
 #include "output-fifo.h"
+#include "util.h"
 
 /*
  * MODULE NOTES
@@ -66,7 +68,6 @@ int
 setup_output_fifo (void)
 {
     OutputPlugin *plugin;
-    bstring name;
 
     /* Allocate and setup plugin data record. */
     plugin = (OutputPlugin*)malloc(sizeof(OutputPlugin));
@@ -92,15 +93,11 @@ setup_output_fifo (void)
  * DESCRIPTION	: This function will initialize the FIFO
  *		: file.
  * INPUT	: 0 - FIFO filename
- * RETURN	: None!
+ * RETURN	: 0 success, -1 failure
  * --------------------------------------------------------- */
 int
 init_output_fifo (bstring fifo_file)
 {
-    FILE *fp;
-    register u_int len = 0;
-    char *filename;
-
     verbose_message("Initializing FIFO output plugin.");
 
     /* Make sure report_file isn't NULL. */
@@ -109,13 +106,13 @@ init_output_fifo (bstring fifo_file)
 
     output_fifo_conf.filename = bstrcpy(fifo_file);
 
-    mkfifo (bdata(fifo_file), S_IFIFO | 0755);
+    mkfifo ((char *)bdata(fifo_file), 0755);
 
     verbose_message("Open FIFO File\n");
-    if ((output_fifo_conf.file = fopen(bdata(fifo_file), "w+")) == NULL)
+    if ((output_fifo_conf.file = fopen((char*)bdata(fifo_file), "w+")) == NULL)
 	err_message("Unable to open FIFO file (%s)!\n", bdata(fifo_file));
 
-    return;
+    return 0;
 }
 
 /* ----------------------------------------------------------
@@ -138,8 +135,9 @@ print_asset_fifo (Asset *rec)
 	if (gc.hide_unknowns == 0 || ((biseq(rec->service, bfromcstr("unknown")) != 0) &&
 		    (biseq(rec->application, bfromcstr("unknown")) != 0))) {
 	    fprintf(output_fifo_conf.file, "01,%s,%d,%d,%s,%s,%d\n",
-		    inet_ntoa(rec->ip_addr), ntohs(rec->port), rec->proto, bdata(rec->service),
-		    bdata(rec->application), rec->discovered);
+			inet_ntoa(rec->ip_addr), ntohs(rec->port), rec->proto,
+			bdata(rec->service), bdata(rec->application),
+			(int)rec->discovered);
 	    fflush(output_fifo_conf.file);
 	}
     } else {
@@ -165,11 +163,13 @@ print_arp_asset_fifo (ArpAsset *rec)
     /* Print to File */
     if (output_fifo_conf.file != NULL) {
 	if (rec->mac_resolved != NULL) {
-	    fprintf(output_fifo_conf.file, "02,%s,%s,%s,%d\n", inet_ntoa(rec->ip_addr),
-		    rec->mac_resolved, hex2mac(&rec->mac_addr), rec->discovered);
+	    fprintf(output_fifo_conf.file, "02,%s,%s,%s,%d\n",
+		inet_ntoa(rec->ip_addr), bdata(rec->mac_resolved),
+		 hex2mac(rec->mac_addr), (int)rec->discovered);
 	} else {
-	    fprintf(output_fifo_conf.file, "02,%s,unknown,%s,%d\n", inet_ntoa(rec->ip_addr),
-		    hex2mac(&rec->mac_addr), rec->discovered);
+	    fprintf(output_fifo_conf.file, "02,%s,unknown,%s,%d\n",
+			inet_ntoa(rec->ip_addr), hex2mac(rec->mac_addr),
+			(int)rec->discovered);
 	}
 
 	fflush(output_fifo_conf.file);
@@ -196,7 +196,8 @@ print_stat_fifo (Asset *rec)
 {
     if (output_fifo_conf.file != NULL) {
 	fprintf(output_fifo_conf.file, "03,%s,%d,%d,%d\n",
-		inet_ntoa(rec->ip_addr), ntohs(rec->port), rec->proto, time(NULL));
+		inet_ntoa(rec->ip_addr), ntohs(rec->port), rec->proto,
+		(int)time(NULL));
 	fflush(output_fifo_conf.file);
 
     } else {

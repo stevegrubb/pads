@@ -24,7 +24,10 @@
  * $Id: output-csv.c,v 1.6 2005/02/22 16:09:25 mattshelton Exp $
  *
  **************************************************************************/
+#include <arpa/inet.h>
 #include "output-csv.h"
+#include "util.h"
+#include "storage.h"
 
 OutputCSVConf output_csv_conf;
 
@@ -40,7 +43,6 @@ int
 setup_output_csv (void)
 {
     OutputPlugin *plugin;
-    bstring name;
 
     /* Allocate and setup plugin data record. */
     plugin = (OutputPlugin*)malloc(sizeof(OutputPlugin));
@@ -68,7 +70,7 @@ setup_output_csv (void)
  *		: will read in the file and add each asset
  *		: to the asset data structure.
  * INPUT	: 0 - CSV filename
- * RETURN	: None!
+ * RETURN	: 0 success, -1 fail
  * --------------------------------------------------------- */
 int
 init_output_csv (bstring filename)
@@ -84,14 +86,15 @@ init_output_csv (bstring filename)
 	output_csv_conf.filename = bstrcpy(bfromcstr("assets.csv"));
 
     /* Check to see if *filename exists. */
-    if ((fp = fopen(bdata(output_csv_conf.filename), "r")) == NULL) {
+    if ((fp = fopen((char *)bdata(output_csv_conf.filename), "r")) == NULL) {
 
 	/* File does not exist, create new.. */
-	if ((output_csv_conf.file = fopen(bdata(output_csv_conf.filename), "w")) != NULL) {
+	if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "w")) != NULL) {
 	    fprintf(output_csv_conf.file, "asset,port,proto,service,application,discovered\n");
 
 	} else {
 	    err_message("Cannot open file %s!", bdata(output_csv_conf.filename));
+	    return -1;
 	}
 
     } else {
@@ -101,12 +104,13 @@ init_output_csv (bstring filename)
 	read_report_file();
 
 	/* Open file and assign it to the global FILE pointer.  */
-	if ((output_csv_conf.file = fopen(bdata(output_csv_conf.filename), "a")) == NULL) {
+	if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "a")) == NULL) {
 	    err_message("Cannot open file %s!", bdata(output_csv_conf.filename));
+	    return -1;
 	}
     }
 
-    return;
+    return 0;
 }
 
 /* ----------------------------------------------------------
@@ -129,7 +133,7 @@ read_report_file (void)
     printf("[-] Processing Existing %s\n", bdata(output_csv_conf.filename));
 
     /* Open Signature File */
-    if ((fp = fopen(bdata(output_csv_conf.filename), "r")) == NULL) {
+    if ((fp = fopen((char *)bdata(output_csv_conf.filename), "r")) == NULL) {
 	err_message("Unable to open CSV file - %s", bdata(output_csv_conf.filename));
     }
 
@@ -144,7 +148,7 @@ read_report_file (void)
     /* Clean Up */
     bdestroy(filedata);
     bstrListDestroy(lines);
-    close(fp);
+    fclose(fp);
 }
 
 /* ----------------------------------------------------------
@@ -172,7 +176,7 @@ parse_raw_report (bstring line)
 
     /* Check to see if this line has something to read. */
     if (line->data[0] == '\0' || line->data[0] == '#')
-	return;
+	return -1;
 
     /* Break line apart. */
     if ((list = bsplit(line, ',')) == NULL)
@@ -186,13 +190,13 @@ parse_raw_report (bstring line)
     }
 
     /* Place data from 'list' into temporary data storage. */
-    if ((inet_aton(bdata(list->entry[0]), &ip_addr)) == -1)
+    if ((inet_aton((char *)bdata(list->entry[0]), &ip_addr)) == -1)
 	ret = -1;
 
-    if ((port = htons(atoi(bdata(list->entry[1])))) == -1)
+    if ((port = htons(atoi((char *)bdata(list->entry[1])))) == -1)
 	ret = -1;
 
-    if ((proto = atoi(bdata(list->entry[2]))) == -1)
+    if ((proto = atoi((char *)bdata(list->entry[2]))) == -1)
 	ret = -1;
 
     if ((service = bstrcpy(list->entry[3])) == NULL)
@@ -201,7 +205,7 @@ parse_raw_report (bstring line)
     if ((application = bstrcpy(list->entry[4])) == NULL)
         ret = -1;
 
-    if ((discovered = atol(bdata(list->entry[5]))) == -1)
+    if ((discovered = atol((char *)bdata(list->entry[5]))) == -1)
 	ret = -1;
 
     /* Make sure that this line contains 'good' data. */
@@ -211,7 +215,7 @@ parse_raw_report (bstring line)
     /* Add Asset to Data Structure */
     if (proto == 0 && ret != -1) {
 	/* ARP */
-	mac2hex(bdata(application), mac_addr, MAC_LEN);
+	mac2hex((char *)bdata(application), mac_addr, MAC_LEN);
 	add_arp_asset(ip_addr, mac_addr, discovered);
     } else {
 	/* Everything Else */
@@ -249,8 +253,9 @@ print_asset_csv (Asset *rec)
 	if (gc.hide_unknowns == 0 || ((biseqcstr(rec->service, "unknown") != 0) &&
 		    (biseqcstr(rec->application, "unknown") != 0))) {
 	    fprintf(output_csv_conf.file, "%s,%d,%d,%s,%s,%d\n",
-		    inet_ntoa(rec->ip_addr), ntohs(rec->port), rec->proto, bdata(rec->service),
-		    bdata(rec->application), rec->discovered);
+		    inet_ntoa(rec->ip_addr), ntohs(rec->port), rec->proto,
+		     bdata(rec->service), bdata(rec->application),
+		     (int)rec->discovered);
 	    fflush(output_csv_conf.file);
 	}
     } else {
@@ -277,11 +282,13 @@ print_arp_asset_csv (ArpAsset *rec)
     /* Print to File */
     if (output_csv_conf.file != NULL) {
 	if (rec->mac_resolved != NULL) {
-	    fprintf(output_csv_conf.file, "%s,0,0,ARP (%s),%s,%d\n", inet_ntoa(rec->ip_addr),
-		    bdata(rec->mac_resolved), hex2mac(rec->mac_addr), rec->discovered);
+	    fprintf(output_csv_conf.file, "%s,0,0,ARP (%s),%s,%d\n",
+		inet_ntoa(rec->ip_addr), bdata(rec->mac_resolved),
+		hex2mac(rec->mac_addr), (int)rec->discovered);
 	} else {
-	    fprintf(output_csv_conf.file, "%s,0,0,ARP,%s,%d\n", inet_ntoa(rec->ip_addr),
-		    hex2mac(rec->mac_addr), rec->discovered);
+	    fprintf(output_csv_conf.file, "%s,0,0,ARP,%s,%d\n",
+			inet_ntoa(rec->ip_addr), hex2mac(rec->mac_addr),
+			(int)rec->discovered);
 	}
 
 	fflush(output_csv_conf.file);
@@ -311,5 +318,7 @@ end_output_csv ()
 
     if (output_csv_conf.filename != NULL)
 	bdestroy(output_csv_conf.filename);
+
+    return 0;
 }
 

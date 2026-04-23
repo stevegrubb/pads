@@ -53,6 +53,6 @@ size_t strlcat(char *dst, const char *src, size_t len);
 #endif
 void drop_privs (bstring newuser, bstring newgroup);
 void mac2hex(const char *mac, char *dst, int len);
-char *hex2mac(unsigned const char *mac);
+char *hex2mac(const char *mac);
 
 /* GLOBALS ----------------------------------------- */

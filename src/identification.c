@@ -26,6 +26,9 @@
  *
  **************************************************************************/
 #include "identification.h"
+#include "util.h"
+#include "storage.h"
+#include "output/output.h"
 
 Signature *signature_list;
 
@@ -57,7 +60,7 @@ int init_identification()
     }
 
     /* Open Signature File */
-    if ((fp = fopen(bdata(filename), "r")) == NULL) {
+    if ((fp = fopen((char *)bdata(filename), "r")) == NULL) {
         err_message("Unable to open signature file - %s", bdata(filename));
     }
 
@@ -73,7 +76,7 @@ int init_identification()
     bdestroy(filename);
     bdestroy(filedata);
     bstrListDestroy(lines);
-    close(fp);
+    fclose(fp);
 
     return 0;
 }
@@ -91,7 +94,7 @@ int init_identification()
 int parse_raw_signature (bstring line, int lineno)
 {
     struct bstrList *raw_sig;
-    struct bstrList *title;
+    struct bstrList *title = NULL;
     Signature *sig;
     bstring pcre_string;
     const char *err;            /* PCRE */
@@ -101,7 +104,7 @@ int parse_raw_signature (bstring line, int lineno)
 
     /* Check to see if this line has something to read. */
     if (line->data[0] == '\0' || line->data[0] == '#')
-        return;
+        return -1;
 
     /* Split Line */
     if ((raw_sig = bsplit(line, ',')) == NULL)
@@ -125,8 +128,10 @@ int parse_raw_signature (bstring line, int lineno)
 
     /* Split Title */
     if (raw_sig->entry[1] != NULL && ret != -1)
-        if ((title = bsplit(raw_sig->entry[1], '/')) == NULL)
-            ret = -1;
+        title = bsplit(raw_sig->entry[1], '/');
+    if (title == NULL)
+            return -1;
+
     if (title->qty < 3)
         ret = -1;
 
@@ -145,7 +150,7 @@ int parse_raw_signature (bstring line, int lineno)
 
         /* PCRE */
         if (pcre_string != NULL) {
-            if ((sig->regex = pcre_compile (bdata(pcre_string), 0, &err, &erroffset, NULL)) == NULL) {
+            if ((sig->regex = pcre_compile ((char *)bdata(pcre_string), 0, &err, &erroffset, NULL)) == NULL) {
                 err_message("Unable to compile signature:  %s at line %d (%s)",
                 err, lineno, bdata(line));
             ret = -1;
@@ -265,7 +270,6 @@ int pcre_identify (struct in_addr ip_addr,
     Signature *list = signature_list;
     int rc;
     int ovector[15];
-    int i;
     bstring app;
 
     while (list != NULL) {
@@ -312,18 +316,18 @@ bstring get_app_name (Signature *sig,
 
     /* Create Application string using the values in signature[i].title.  */
     if (sig->title.app != NULL) {
-        strlcpy(app, bdata(sig->title.app), MAX_APP);
+        strlcpy(app, (char *)bdata(sig->title.app), MAX_APP);
     }
     if (sig->title.ver != NULL) {
         if (sig->title.ver->slen > 0) {
             strcat(app, " ");
-            strlcat(app, bdata(sig->title.ver), MAX_VER);
+            strlcat(app, (char *)bdata(sig->title.ver), MAX_VER);
         }
     }
     if (sig->title.misc != NULL) {
         if (sig->title.misc->slen > 0) {
             strcat(app, " (");
-            strlcat(app, bdata(sig->title.misc), MAX_MISC);
+            strlcat(app, (char *)bdata(sig->title.misc), MAX_MISC);
             strcat(app, ")");
         }
     }
@@ -416,7 +420,8 @@ void print_signature()
         printf("2a: %s\n", bdata(list->title.app));
         printf("2b: %s\n", bdata(list->title.ver));
         printf("2c: %s\n", bdata(list->title.misc));
-        printf("3:  %s\n", list->regex);
+        // FIXME: This is a compiled expression
+        // printf("3:  %s\n", list->regex);
         printf("\n");
 
         i++;

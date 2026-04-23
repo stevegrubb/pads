@@ -26,6 +26,10 @@
  *
  **************************************************************************/
 #include "packet.h"
+#include "output/output.h"
+#include "storage.h"
+#include "monnet.h"
+#include "identification.h"
 
 /* ----------------------------------------------------------
  * FUNCTION	: process_eth
@@ -157,9 +161,9 @@ void process_arp (const struct pcap_pkthdr* pkthdr, const u_char* packet, unsign
 	case ARPOP_REPLY:
 	    memcpy(&ip_addr.s_addr, arph->arp_spa, sizeof(u_int8_t) * 4);
 
-	    if (check_arp_asset(ip_addr, arph->arp_sha) == 1) {
-		add_arp_asset(ip_addr, arph->arp_sha, 0);
-		print_arp_asset (ip_addr, arph->arp_sha);
+	    if (check_arp_asset(ip_addr, (char *)arph->arp_sha) == 1) {
+		add_arp_asset(ip_addr, (char *)arph->arp_sha, 0);
+		print_arp_asset (ip_addr, (char *)arph->arp_sha);
 	    }
 
 	    break;
@@ -222,7 +226,7 @@ void process_tcp (const struct pcap_pkthdr* pkthdr, const u_char* packet, unsign
 		 * Check to see if this ACK packet needs to be
 		 * identified.
 		 */
-		payload = (u_char *)(packet + sizeof(struct tcphdr) + len);
+		payload = (char *)(packet + sizeof(struct tcphdr) + len);
 
 		/* Attempt to identify this asset.  */
 		if(tcp_identify(ip_src, tcph->th_sport, payload,

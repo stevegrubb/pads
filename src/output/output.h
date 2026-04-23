@@ -25,6 +25,8 @@
  * $Id: output.h,v 1.3 2005/02/18 05:39:09 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef OUTPUT_HEADER
+#define OUTPUT_HEADER
 
 /* DEFINES ----------------------------------------- */
 #ifdef LINUX
@@ -77,3 +79,4 @@ int print_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN]);
 int print_stat(struct in_addr ip_addr, u_int16_t port, unsigned short proto);
 void end_output (void);
 
+#endif
