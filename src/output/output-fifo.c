@@ -71,7 +71,7 @@ setup_output_fifo (void)
 
     /* Allocate and setup plugin data record. */
     plugin = (OutputPlugin*)malloc(sizeof(OutputPlugin));
-    plugin->name = bstrcpy(bfromcstr("fifo"));
+    plugin->name = bfromcstr("fifo");
     plugin->init = init_output_fifo;
     plugin->print_asset = print_asset_fifo;
     plugin->print_arp = print_arp_asset_fifo;
@@ -102,7 +102,7 @@ init_output_fifo (bstring fifo_file)
 
     /* Make sure report_file isn't NULL. */
     if (fifo_file == NULL)
-	fifo_file = bstrcpy(bfromcstr("pads.fifo"));
+	fifo_file = bfromcstr("pads.fifo");
 
     output_fifo_conf.filename = bstrcpy(fifo_file);
 

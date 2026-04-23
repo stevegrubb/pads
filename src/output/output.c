@@ -31,8 +31,8 @@
 #include "output-fifo.h"
 #include "storage.h"
 
-/* Global Variables */
-OutputPluginList *output_plugin_list;
+/* Local Variables */
+static OutputPluginList *output_plugin_list = NULL;
 
 /* ----------------------------------------------------------
  * FUNCTION	: init_output()
@@ -77,6 +77,7 @@ int register_output_plugin (OutputPlugin *plugin)
     list = (OutputPluginList*)malloc(sizeof(OutputPluginList));
     list->plugin = plugin;
     list->active = 0;
+    list->next = NULL;
 
     /* Place plugin in data structure. */
     if (output_plugin_list == NULL) {

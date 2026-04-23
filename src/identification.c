@@ -96,7 +96,7 @@ int parse_raw_signature (bstring line, int lineno)
     struct bstrList *raw_sig;
     struct bstrList *title = NULL;
     Signature *sig;
-    bstring pcre_string;
+    bstring pcre_string = NULL;
     const char *err;            /* PCRE */
     int erroffset;              /* PCRE */
     int ret = 0;
@@ -117,10 +117,12 @@ int parse_raw_signature (bstring line, int lineno)
     } else if (raw_sig->qty > 3) {
         pcre_string = bstrcpy(raw_sig->entry[2]);
         for (i = 3; i < raw_sig->qty; i++) {
-            if ((bconcat(pcre_string, bfromcstr(","))) == BSTR_ERR)
+            bstring tmp = bfromcstr(",");
+            if ((bconcat(pcre_string, tmp)) == BSTR_ERR)
                 ret = -1;
             if ((bconcat(pcre_string, raw_sig->entry[i])) == BSTR_ERR)
                 ret = -1;
+            bdestroy(tmp);
         }
     } else {
         pcre_string = bstrcpy(raw_sig->entry[2]);
@@ -129,8 +131,10 @@ int parse_raw_signature (bstring line, int lineno)
     /* Split Title */
     if (raw_sig->entry[1] != NULL && ret != -1)
         title = bsplit(raw_sig->entry[1], '/');
-    if (title == NULL)
+    if (title == NULL) {
+            bdestroy(pcre_string);
             return -1;
+    }
 
     if (title->qty < 3)
         ret = -1;
@@ -139,6 +143,7 @@ int parse_raw_signature (bstring line, int lineno)
     if (ret != -1) {
         sig = (Signature*)malloc(sizeof(Signature));
         sig->next = NULL;
+        sig->regex = NULL;
         if (raw_sig->entry[0] != NULL)
             sig->service = bstrcpy(raw_sig->entry[0]);
         if (title->entry[1] != NULL)
@@ -280,6 +285,7 @@ int pcre_identify (struct in_addr ip_addr,
         if (rc != -1) {
             app = get_app_name(list, payload, ovector, rc);
             update_asset(ip_addr, port, proto, list->service, app);
+            bdestroy(app);
             return 1;
         }
 
@@ -359,7 +365,7 @@ bstring get_app_name (Signature *sig,
     }
     sub[z] = '\0';
 
-    retval = bstrcpy(bfromcstr(sub));
+    retval = bfromcstr(sub);
     return retval;
 
 }
@@ -388,6 +394,7 @@ void end_identification()
             bdestroy(signature_list->title.ver);
         if (signature_list->title.misc != NULL)
             bdestroy(signature_list->title.misc);
+        pcre_free(signature_list->regex);
 
         /* Free Record */
         if (signature_list != NULL)

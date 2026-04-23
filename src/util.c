@@ -120,7 +120,7 @@ init_pid_file (bstring pid_file, bstring user, bstring group)
     struct passwd *this_user;
 
     /* Default PID File */
-    if (gc.pid_file->slen >= 0)
+    if (gc.pid_file == NULL || gc.pid_file->slen == 0)
         gc.pid_file = bfromcstr("/var/run/pads.pid");
 
     /* Create PID File */

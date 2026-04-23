@@ -46,7 +46,7 @@ setup_output_csv (void)
 
     /* Allocate and setup plugin data record. */
     plugin = (OutputPlugin*)malloc(sizeof(OutputPlugin));
-    plugin->name = bstrcpy(bfromcstr("csv"));
+    plugin->name = bfromcstr("csv");
     plugin->init = init_output_csv;
     plugin->print_asset = print_asset_csv;
     plugin->print_arp = print_arp_asset_csv;
@@ -83,7 +83,7 @@ init_output_csv (bstring filename)
     if (filename != NULL)
 	output_csv_conf.filename = bstrcpy(filename);
     else
-	output_csv_conf.filename = bstrcpy(bfromcstr("assets.csv"));
+	output_csv_conf.filename = bfromcstr("assets.csv");
 
     /* Check to see if *filename exists. */
     if ((fp = fopen((char *)bdata(output_csv_conf.filename), "r")) == NULL) {

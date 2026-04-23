@@ -29,8 +29,8 @@
 #include "storage.h"
 #include "mac-resolution.h"
 
-Asset *asset_list;
-ArpAsset *arp_asset_list;
+static Asset *asset_list = NULL;
+static ArpAsset *arp_asset_list = NULL;
 
 /* ----------------------------------------------------------
  * FUNCTION	: check_tcp_asset
@@ -343,7 +343,9 @@ short update_asset (struct in_addr ip_addr,
 		&& port == list->port
 		&& proto == list->proto) {
 	    /* Found! */
+	    bdestroy(list->service);
 	    list->service = bstrcpy(service);
+	    bdestroy(list->application);
 	    list->application = bstrcpy(application);
 	    return 0;
 

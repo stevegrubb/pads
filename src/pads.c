@@ -165,9 +165,33 @@ print_version (void)
  * FUNCTION     : init_pads
  * DESCRIPTION  : This function will initialize PADS.
  * ---------------------------------------------------------- */
+void init_gc(void)
+{
+    gc.handle = NULL;
+    gc.dev = NULL;
+    gc.pcap_filter = NULL;
+    gc.conf_file = NULL;
+    gc.report_file = NULL;
+    gc.fifo_file = NULL;
+    gc.pcap_file = NULL;
+    gc.dump_file = NULL;
+    gc.pid_file = NULL;
+    gc.sig_file = NULL;
+    gc.mac_file = NULL;
+    gc.priv_user = NULL;
+    gc.priv_group = NULL;
+}
+
+/* ----------------------------------------------------------
+ * FUNCTION     : init_pads
+ * DESCRIPTION  : This function will initialize PADS.
+ * ---------------------------------------------------------- */
 void
 init_pads (void)
 {
+    /* Init global config to known state */
+    init_gc();
+
     /* Process the command line parameters. */
     process_cmdline(prog_argc, prog_argv);
 
@@ -179,15 +203,22 @@ init_pads (void)
         init_configuration(gc.conf_file);
 
     } else {
-        /* Default Output Plugins:  These plugins are activated if a configuration
-         * file is not specified. */
+        bstring name, args;
+        /* Default Output Plugins:  These plugins are activated if a
+         *  configuration file is not specified. */
 
         /* output:  screen */
-        if ((activate_output_plugin(bfromcstr("screen"), bfromcstr(""))) == -1)
+        name = bfromcstr("screen");
+        args = bfromcstr("");
+        if ((activate_output_plugin(name, args)) == -1)
             log_message("warning:  'activate_output_plugin' in function 'init_pads' failed.");
+        bdestroy(name);
+        bdestroy(args);
         /* output:  csv */
-        if ((activate_output_plugin(bfromcstr("csv"), gc.report_file)) == -1)
+        name = bfromcstr("csv");
+        if ((activate_output_plugin(name, gc.report_file)) == -1)
             log_message("warning:  'activate_output_plugin' in function 'init_pads' failed.");
+        bdestroy(name);
     }
 
     /* Initialize Modules */

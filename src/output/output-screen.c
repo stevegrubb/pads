@@ -43,7 +43,7 @@ setup_output_screen (void)
 
     /* Allocate and setup plugin data record. */
     plugin = (OutputPlugin*)malloc(sizeof(OutputPlugin));
-    plugin->name = bstrcpy(bfromcstr("screen"));
+    plugin->name = bfromcstr("screen");
     plugin->init = init_output_screen;
     plugin->print_asset = print_asset_screen;
     plugin->print_arp = print_arp_asset_screen;
