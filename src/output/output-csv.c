@@ -60,6 +60,9 @@ setup_output_csv (void)
 	log_message("warning:  'register_output_plugin' in function 'setup_output_csv' failed.");
 	return -1;
     }
+    output_csv_conf.filename = NULL;
+    output_csv_conf.file = NULL;
+    output_csv_conf.readonly = 0;
 
     return 0;
 }
@@ -81,22 +84,39 @@ init_output_csv (bstring filename)
     verbose_message("Initializing CSV output plugin.");
 
     /* Make sure filename isn't NULL. */
-    if (filename != NULL)
-	output_csv_conf.filename = bstrcpy(filename);
-    else
+    if (filename != NULL) {
+        /* Parse the args looking for readonly and file name */
+        int i;
+        struct bstrList *list = bsplit(filename, ' ');
+        if (list->qty > 2) {
+            err_message("Too many args for output csv");
+            return -1;
+        }
+        for (i=0; i< list->qty; i++) {
+            if (biseqcstr(list->entry[i], "readonly") == 1) {
+                output_csv_conf.readonly = 1;
+                verbose_message("Using csv file in read only mode.");
+            } else if (output_csv_conf.filename == NULL)
+	        output_csv_conf.filename = bstrcpy(filename);
+            else
+                err_message("Unrecognized output csv option");
+	} 
+        bstrListDestroy(list);
+    } else
 	output_csv_conf.filename = bfromcstr("assets.csv");
 
     /* Check to see if *filename exists. */
     if ((fp = fopen((char *)bdata(output_csv_conf.filename), "r")) == NULL) {
 
-	/* File does not exist, create new.. */
-	if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "w")) != NULL) {
-	    fprintf(output_csv_conf.file, "asset,port,proto,service,application,discovered\n");
-	    fflush(output_csv_conf.file);
-
-	} else {
-	    err_message("Cannot open file %s!", bdata(output_csv_conf.filename));
-	    return -1;
+	if (output_csv_conf.readonly == 0) {
+	    /* File does not exist, create new.. */
+	    if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "w")) != NULL) {
+	        fprintf(output_csv_conf.file, "asset,port,proto,service,application,discovered\n");
+	        fflush(output_csv_conf.file);
+	    } else {
+	        err_message("Cannot open file %s!", bdata(output_csv_conf.filename));
+	        return -1;
+            }
 	}
 
     } else {
@@ -105,11 +125,14 @@ init_output_csv (bstring filename)
 	fclose(fp);
 	read_report_file();
 
-	/* Open file and assign it to the global FILE pointer.  */
-	if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "a")) == NULL) {
-	    err_message("Cannot open file %s!", bdata(output_csv_conf.filename));
-	    return -1;
-	}
+	if (output_csv_conf.readonly == 0) {
+	    /* Open file and assign it to the global FILE pointer.  */
+	    if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "a")) == NULL) {
+	        err_message("Cannot open file %s!",
+                            bdata(output_csv_conf.filename));
+	        return -1;
+	    }
+        }
     }
 
     return 0;
@@ -255,6 +278,9 @@ parse_raw_report (bstring line)
 int
 print_asset_csv (Asset *rec)
 {
+    if (output_csv_conf.readonly)
+        return 0;
+
     if (output_csv_conf.file != NULL) {
 	if (gc.hide_unknowns == 0 || ((biseqcstr(rec->service, "unknown") != 0) &&
 		    (biseqcstr(rec->application, "unknown") != 0))) {
@@ -285,6 +311,9 @@ print_asset_csv (Asset *rec)
 int
 print_arp_asset_csv (ArpAsset *rec)
 {
+    if (output_csv_conf.readonly)
+        return 0;
+
     /* Print to File */
     if (output_csv_conf.file != NULL) {
 	if (rec->mac_resolved != NULL) {

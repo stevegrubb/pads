@@ -69,9 +69,12 @@ assets found in these networks will be recorded.  For example, "network
 This output plugin displays PADS data to the screen.  When using the
 configuration file, it defaults to off.
 
-.IP "output csv: <filename>"
+.IP "output csv: <filename> [readonly]"
 This output plugin writes PADS data to a CSV file.  Optionally, a CSV filename
-can be specified as an argument.
+can be specified as an argument. If you want the file used only to populate
+the internal known assets list but never be updated, then use the readonly
+option. This would be handy when you have a baseline and want to use it for
+intrusion detection.
 
 .IP "output fifo: <filename>"
 This output plugin writes PADS data to a FIFO file.  Optionally, a FIFO

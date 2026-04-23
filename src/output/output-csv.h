@@ -50,6 +50,7 @@ typedef struct _OutputCSVConf
 {
     FILE *file;
     bstring filename;
+    int readonly;
 } OutputCSVConf;
 
 
