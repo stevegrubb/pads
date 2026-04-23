@@ -26,6 +26,8 @@
  * $Id: configuration.h,v 1.2 2005/02/18 05:50:19 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef CONFIGURATION_HEADER
+#define CONFIGURATION_HEADER
 
 /* DEFINES ----------------------------------------- */
 #ifdef LINUX
@@ -40,8 +42,7 @@
 
 /* INCLUDES ---------------------------------------- */
 #include "global.h"
-
-#include <stdio.h>
+#include "configuration.h"
 #include "bstring/bstrlib.h"
 
 /* PROTOTYPES -------------------------------------- */
@@ -51,3 +52,6 @@ int conf_module_plugin (bstring value, int (*ptrFunc)(bstring, bstring));
 
 /* External Prototypes */
 int activate_output_plugin (bstring name, bstring args);
+
+#endif
+

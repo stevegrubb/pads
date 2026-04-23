@@ -75,38 +75,6 @@ chomp (char *string, int size)
 }
 
 /* ----------------------------------------------------------
- * FUNCTION     : daemonize
- * DESCRIPTION  : This function will place the application in
- *              : the background.
- * INPUT        : None!
- * RETURN       : None!
- * ---------------------------------------------------------- */
-void
-daemonize ()
-{
-    pid_t pid;
-
-    if (!gc.daemon_mode)
-        printf("[-] Daemonizing...\n");
-
-    pid = fork();
-    if (pid > 0) {
-        /* Parent */
-        exit(0);
-    } else if (pid < 0) {
-        /* Error */
-        err_message("fork");
-        exit(0);
-    } else {
-        /* Child */
-        setsid();
-        close(0);
-        close(1);
-        close(2);
-    }
-}
-
-/* ----------------------------------------------------------
  * FUNCTION     : init_pid_file
  * DESCRIPTION  : This function will generate a file
  *              : containing the application's PID.

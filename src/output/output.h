@@ -71,7 +71,7 @@ typedef struct _OutputPluginList
 } OutputPluginList;
 
 /* PROTOTYPES -------------------------------------- */
-void init_output();
+int init_output(void);
 int register_output_plugin (OutputPlugin *plugin);
 int activate_output_plugin (bstring name, bstring args);
 int print_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto);

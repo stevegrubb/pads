@@ -29,6 +29,7 @@
 #include "output-screen.h"
 #include "output-csv.h"
 #include "output-fifo.h"
+#include "output-prelude.h"
 #include "storage.h"
 
 /* Local Variables */
@@ -43,7 +44,7 @@ static OutputPluginList *output_plugin_list = NULL;
  * INPUT	: None!
  * RETURN	: None!
  * ---------------------------------------------------------- */
-void init_output()
+int init_output(void)
 {
 
     /* Load Screen Plug-in */
@@ -55,6 +56,11 @@ void init_output()
     /* Load FIFO Plug-in */
     setup_output_fifo();
 
+    /* Load Prelude Plug-in */
+    if (setup_output_prelude() < 0)
+	return -1;
+
+    return 0;
 }
 
 /* ----------------------------------------------------------

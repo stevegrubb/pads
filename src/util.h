@@ -39,12 +39,27 @@
 /* PROTOTYPES -------------------------------------- */
 void strip_comment (char *string);
 int chomp (char *string, int size);
-void daemonize (void);
 void init_pid_file (bstring pid_file, bstring user, bstring group);
 char *copy_argv(register char **argv);
-void log_message (const char *msg, ...);
-void err_message (const char *msg, ...);
-void verbose_message (const char *msg, ...);
+void log_message (const char *msg, ...)
+#ifdef __GNUC__
+        __attribute__ ((format (printf, 1, 2)));
+#else
+        ;
+#endif
+void err_message (const char *msg, ...)
+#ifdef __GNUC__
+        __attribute__ ((format (printf, 1, 2)));
+#else
+        ;
+#endif
+void verbose_message (const char *msg, ...)
+#ifdef __GNUC__
+        __attribute__ ((format (printf, 1, 2)));
+#else
+        ;
+#endif
+
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *dst, const char *src, size_t size);
 #endif

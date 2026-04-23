@@ -25,6 +25,8 @@
  * $Id: pads.h,v 1.4 2005/03/11 01:04:12 mattshelton Exp $
  *
  **************************************************************************/
+#ifndef PADS_HEADER
+#define PADS_HEADER
 
 /* DEFINES ----------------------------------------- */
 #ifdef LINUX
@@ -51,21 +53,14 @@
 /* TYPEDEFS ---------------------------------------- */
 typedef void (*proc_t)(const struct pcap_pkthdr *, const u_char *);
 
+extern char **prog_argv;
+extern int prog_argc;
+extern GC gc;
+
 
 /* PROTOTYPES -------------------------------------- */
 void process_pkt(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* packet);
-void set_processor (pcap_t *this_handle);
-void print_header(void);
-void print_usage(void);
-void print_version(void);
-void init_pads(void);
-void main_pads(void);
 void end_pads(void);
-
-void sig_term_handler(int signal);
-void sig_int_handler(int signal);
-void sig_quit_handler(int signal);
-void sig_hup_handler(int signal);
 
 /* packet.h LLC prototypes */
 void process_eth (const struct pcap_pkthdr* pkthdr, const u_char* packet);
@@ -73,3 +68,4 @@ void process_sll (const struct pcap_pkthdr* pkthdr, const u_char* packet);
 
 /* vim:expandtab:cindent:smartindent:ts=4:tw=0:sw=4:
  */
+#endif

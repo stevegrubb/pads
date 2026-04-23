@@ -6,4 +6,8 @@ liboutput_a_SOURCES = output.c output.h \
                       output-csv.c output-csv.h \
                       output-fifo.c output-fifo.h
 
+if HAVE_PRELUDE 
+liboutput_a_SOURCES +=  output-prelude.c output-prelude.h
+endif
+
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/src -I$(top_srcdir)/lib

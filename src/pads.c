@@ -43,6 +43,18 @@ int prog_argc;
 
 /* Function Declarations */
 static int process_cmdline (int argc, char *argv[]);
+static void set_processor (pcap_t *this_handle);
+static void print_header(void);
+static void print_usage(void);
+static void print_version(void);
+static int  init_pads(void);
+static int  main_pads(void);
+
+static void sig_term_handler(int signal);
+static void sig_int_handler(int signal);
+static void sig_quit_handler(int signal);
+static void sig_hup_handler(int signal);
+
 
 /* ----------------------------------------------------------
  * FUNCTION     : process_pkt
@@ -68,7 +80,7 @@ process_pkt (u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* packe
  * INPUT        : PCAP Handle
  * RETURN       : None!
  * ---------------------------------------------------------- */
-void
+static void
 set_processor (pcap_t *this_handle)
 {
     int datalink;
@@ -100,7 +112,7 @@ set_processor (pcap_t *this_handle)
  * FUNCTION     : print_header
  * DESCRIPTION  : Prints initial header.
  * ---------------------------------------------------------- */
-void
+static void
 print_header ()
 {
     printf("pads - Passive Asset Detection System\n");
@@ -113,7 +125,7 @@ print_header ()
  * FUNCTION    : print_usage
  * DESCRIPTION    : Prints the Program Usage
  * ---------------------------------------------------------- */
-void
+static void
 print_usage()
 {
     printf("Usage:\n"
@@ -148,7 +160,7 @@ print_usage()
  * DESCRIPTION  : This function will print version
  *              : version information.
  * ---------------------------------------------------------- */
-void
+static void
 print_version (void)
 {
     printf("Build:\n");
@@ -162,7 +174,7 @@ print_version (void)
 }
 
 /* ----------------------------------------------------------
- * FUNCTION     : init_pads
+ * FUNCTION     : init_gc
  * DESCRIPTION  : This function will initialize PADS.
  * ---------------------------------------------------------- */
 void init_gc(void)
@@ -185,8 +197,9 @@ void init_gc(void)
 /* ----------------------------------------------------------
  * FUNCTION     : init_pads
  * DESCRIPTION  : This function will initialize PADS.
+ * RETURN       : 0 success, -1 failure
  * ---------------------------------------------------------- */
-void
+static int
 init_pads (void)
 {
     /* Init global config to known state */
@@ -199,7 +212,8 @@ init_pads (void)
         print_header();
 
     /* Initialize Output Module */
-    init_output();
+    if (init_output() < 0)
+        return -1;
 
     /* Process the configuration file. */
     if (gc.conf_file) {
@@ -230,7 +244,10 @@ init_pads (void)
 
     /* Daemon Mode:  fork child process */
     if (gc.daemon_mode) {
-        daemonize();
+        verbose_message("[-] Daemonizing...\n");
+        if (daemon(0, 0) < 0) {
+            err_message("Daemonize failed");
+        }
         init_pid_file(gc.pid_file, gc.priv_user, gc.priv_group);
     }
 
@@ -239,17 +256,21 @@ init_pads (void)
     (void) signal(SIGINT, sig_int_handler);
     (void) signal(SIGQUIT, sig_quit_handler);
     (void) signal(SIGHUP, sig_hup_handler);
+
+    return 0;
 }
 
 /* ----------------------------------------------------------
  * FUNCTION     : main_pads
  * DESCRIPTION  : This is the main function for PADS.
+ * RETURN       : 0 success, -1 failure
  * ---------------------------------------------------------- */
-void
+static int
 main_pads (void)
 {
     /* Initialize */
-    init_pads();
+    if (init_pads() < 0)
+        return -1;
 
     if (gc.pcap_file) {
         /* Read from PCAP file specified by '-r' switch. */
@@ -324,6 +345,7 @@ main_pads (void)
 
     /* End */
     end_pads();
+    return 0;
 }
 
 /* ----------------------------------------------------------
@@ -490,25 +512,25 @@ process_cmdline (int argc, char *argv[])
  * initialized in 'init_pads' and will perform a function
  * based on the signal.
  * ---------------------------------------------------------- */
-void
+static void
 sig_term_handler(int signal)
 {
     end_pads();
 }
 
-void
+static void
 sig_int_handler(int signal)
 {
     end_pads();
 }
 
-void
+static void
 sig_quit_handler(int signal)
 {
     end_pads();
 }
 
-void
+static void
 sig_hup_handler(int signal)
 {
     /* The HUP signal has not been implemented yet. */
@@ -526,9 +548,7 @@ main(int argc, char *argv[])
     prog_argv = argv;
 
     /* Main Program */
-    main_pads();
-
-    return(0);
+    return main_pads();
 }
 
 /* vim:expandtab:cindent:smartindent:ts=4:tw=0:sw=4:

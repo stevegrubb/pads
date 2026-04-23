@@ -97,6 +97,26 @@ AC_CHECK_LIB(pcap, pcap_open_live,
     AC_MSG_ERROR([Cannot find PCAP libraries!!]))
 
 ##
+# Configure prelude
+##
+AC_ARG_WITH(prelude,
+AS_HELP_STRING([--with-prelude],[enable prelude IDS support]),
+use_prelude=$withval,
+use_prelude=no)
+if test x$use_prelude = xno ; then
+    have_prelude=no;
+else
+    AC_CHECK_LIB(prelude, prelude_init, have_prelude=yes, have_prelude=no)
+    if test x$have_prelude = xno ; then
+       AC_MSG_ERROR([Prelude explicitly required and prelude library not found])
+    else
+       AC_DEFINE(HAVE_PRELUDE,1,[Have Prelude Libraries])
+       LIBS="$LIBS -lprelude"
+    fi
+fi
+AM_CONDITIONAL(HAVE_PRELUDE, test x$have_prelude = xyes)
+
+##
 # Checks for header files.
 ##
 AC_CHECK_HEADERS([stdio.h stdarg.h signal.h time.h unistd.h])
