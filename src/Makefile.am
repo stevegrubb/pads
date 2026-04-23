@@ -1,6 +1,7 @@
 ## $Id: Makefile.am,v 1.3 2005/02/17 16:29:54 mattshelton Exp $
 AUTOMAKE_OPTIONS=foreign no-dependencies
 bin_PROGRAMS = pads
+pads_CFLAGS = -pthread
 pads_SOURCES = pads.c pads.h \
 	       storage.c storage.h \
                identification.c identification.h \
@@ -10,6 +11,7 @@ pads_SOURCES = pads.c pads.h \
 	       configuration.c configuration.h \
                util.c util.h \
                global.h
+pads_LDFLAGS = -pthread
 pads_LDADD = $(top_srcdir)/lib/bstring/libbstring.a output/liboutput.a
 bin_SCRIPTS = pads-report
 
