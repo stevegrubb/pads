@@ -236,20 +236,12 @@ init_pads (void)
         if ((activate_output_plugin(name, gc.report_file)) == -1)
             err_message("Error:  'activate_output_plugin' in function 'init_pads' failed.");
         bdestroy(name);
+        become_daemon();
     }
 
     /* Initialize Modules */
     init_identification();
     init_mac_resolution();
-
-    /* Daemon Mode:  fork child process */
-    if (gc.daemon_mode) {
-        verbose_message("[-] Daemonizing...\n");
-        if (daemon(0, 0) < 0) {
-            err_message("Daemonize failed");
-        }
-        init_pid_file(gc.pid_file, gc.priv_user, gc.priv_group);
-    }
 
     /* Signal Trapping */
     (void) signal(SIGTERM, sig_term_handler);
@@ -291,9 +283,13 @@ main_pads (void)
 
         /* Determine Sniffing Interface */
         if (!gc.dev) {
+            char *dev;
             verbose_message("Looking for sniffing interface");
-            if (!(gc.dev = pcap_lookupdev(errbuf)))
-                err_message("Unable to find a sniffing interface!  (%s)", errbuf);
+            dev = pcap_lookupdev(errbuf);
+            if (!dev)
+                err_message("Unable to find a sniffing interface!  (%s)",
+                        errbuf);
+            gc.dev = strdup(dev);
         }
 
         /* Set up libpcap connection. */

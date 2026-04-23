@@ -39,7 +39,7 @@
 /* PROTOTYPES -------------------------------------- */
 void strip_comment (char *string);
 int chomp (char *string, int size);
-void init_pid_file (bstring pid_file, bstring user, bstring group);
+void become_daemon(void);
 char *copy_argv(register char **argv);
 void log_message (const char *msg, ...)
 #ifdef __GNUC__

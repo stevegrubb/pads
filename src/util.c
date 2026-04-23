@@ -81,7 +81,7 @@ chomp (char *string, int size)
  * INPUT        : 0 - PID filename
  * RETURN       : None!
  * ---------------------------------------------------------- */
-void
+static void
 init_pid_file (bstring pid_file, bstring user, bstring group)
 {
     int pid;
@@ -113,6 +113,23 @@ init_pid_file (bstring pid_file, bstring user, bstring group)
     if ((chown((char *)bdata(pid_file), this_user->pw_uid, this_group->gr_gid)) != 0)
         err_message("Unable to change PID file's ownership.");
 
+}
+
+/* ----------------------------------------------------------
+ *  * FUNCTION     : become_daemon
+ *   * DESCRIPTION  : This function makes pads into a daemon
+ *    * RETURN       : none
+ *     * ---------------------------------------------------------- */
+void become_daemon(void)
+{
+    if (gc.daemon_mode) {
+        /* Daemon Mode:  fork child process */
+        verbose_message("[-] Daemonizing...\n");
+        if (daemon(0, 0) < 0) {
+            err_message("Daemonize failed");
+        }
+        init_pid_file(gc.pid_file, gc.priv_user, gc.priv_group);
+    }
 }
 
 /* ----------------------------------------------------------

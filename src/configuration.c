@@ -115,7 +115,7 @@ void parse_line (bstring line)
             else
                 gc.daemon_mode = 0;
         }
-
+        become_daemon();
     } else if ((biseqcstr(param, "pid_file")) == 1) {
             /* PID FILE */
         gc.pid_file = bstrcpy(value);
