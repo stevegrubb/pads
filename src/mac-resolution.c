@@ -160,7 +160,7 @@ int add_vendor (char *mac, char *vendor){
  * INPUT        : 0 - MAC Address
  * RETURN       : Vendor Name
  * ---------------------------------------------------------- */
-bstring get_vendor (char *m)
+bstring get_vendor (const char *m)
 {
     Vendor *list;
     char mac[4];

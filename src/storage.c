@@ -108,7 +108,7 @@ int check_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN])
     rec = arp_asset_list;
     while (rec != NULL) {
 	if (rec->ip_addr.s_addr == ip_addr.s_addr
-		&& (strcmp(rec->mac_addr, mac_addr) == 0)) {
+		&& (memcmp(rec->mac_addr, mac_addr, MAC_LEN) == 0)) {
 	    return 0;
 
 	} else {
@@ -200,7 +200,7 @@ void add_asset (struct in_addr ip_addr,
  *		: 2 - Discovered
  * RETURN	: None!
  * ---------------------------------------------------------- */
-void add_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN],
+void add_arp_asset (struct in_addr ip_addr, const char *mac_addr,
 		    time_t discovered)
 {
     ArpAsset *list;

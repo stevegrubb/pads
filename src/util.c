@@ -27,6 +27,7 @@
  **************************************************************************/
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
 #include "util.h"
 #include "pads.h"
 
@@ -426,31 +427,39 @@ drop_privs (bstring newuser, bstring newgroup)
  * INPUT        : 0 - MAC Address
  *              : 1 - Converted
  *              : 0 - Size of 1
- * RETURN       : None
+ * RETURN       : 0 - success, -1 failure
  * ---------------------------------------------------------- */
-void
+int
 mac2hex(const char *mac, char *dst, int len)
 {
     int i;
-    long l;
-    char *pp;
+    unsigned long l;
 
     if (len < 6)
-        return;
+        return -1;
 
     while (isspace(*mac))
         mac++;
 
     /* expect 6 hex octets separated by ':' or space/NUL if last octet */
-    for (i = 0; i < 6; i++) {
-        l = strtol(mac, &pp, 16);
-        if (pp == mac || l > 0xFF || l < 0)
-            return;
-        if (!(*pp == ':' || (i == 5 && (isspace(*pp) || *pp == '\0'))))
-            return;
-        dst[i] = (u_char) l;
-        mac = pp + 1;
+    for (i = 0; i < MAC_LEN; i++) {
+        char tmp[3];
+
+        while (*mac == ':' || *mac == ' ')
+            mac++;
+        if (mac[0] == 0 || mac[1] == 0)
+            return -1;
+        tmp[0] = mac[0];
+        tmp[1] = mac[1];
+        tmp[2] = 0;
+        errno = 0;
+        l = strtoul(tmp, NULL, 16);
+        if (errno)
+            return -1;
+        dst[i] = (u_char)(l & 0xFF);
+        mac+=2;
     }
+    return 0;
 }
 
 /* ----------------------------------------------------------
@@ -464,11 +473,11 @@ mac2hex(const char *mac, char *dst, int len)
 char *
 hex2mac(const char *mac)
 {
-    static char buf[18];
+    static char buf[32];
 
     snprintf(buf, sizeof(buf), "%02X:%02X:%02X:%02X:%02X:%02X",
-        mac[0], mac[1], mac[2],
-        mac[3], mac[4], mac[5]);
+        (mac[0] & 0xFF) , (mac[1] & 0xFF), (mac[2] & 0xFF),
+        (mac[3] & 0xFF), (mac[4] & 0xFF), (mac[5] & 0xFF));
 
     return buf;
 }

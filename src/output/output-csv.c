@@ -91,6 +91,7 @@ init_output_csv (bstring filename)
 	/* File does not exist, create new.. */
 	if ((output_csv_conf.file = fopen((char *)bdata(output_csv_conf.filename), "w")) != NULL) {
 	    fprintf(output_csv_conf.file, "asset,port,proto,service,application,discovered\n");
+	    fflush(output_csv_conf.file);
 
 	} else {
 	    err_message("Cannot open file %s!", bdata(output_csv_conf.filename));
@@ -216,8 +217,11 @@ parse_raw_report (bstring line)
     /* Add Asset to Data Structure */
     if (proto == 0 && ret != -1) {
 	/* ARP */
-	mac2hex((char *)bdata(application), mac_addr, MAC_LEN);
-	add_arp_asset(ip_addr, mac_addr, discovered);
+	if (mac2hex((char *)bdata(application), mac_addr, MAC_LEN) == 0)
+		add_arp_asset(ip_addr, mac_addr, discovered);
+	else
+		log_message("Error parsing HWaddr %s - skipping", 
+			(char *)bdata(application));
     } else {
 	/* Everything Else */
 	add_asset(ip_addr, port, proto, service, application, discovered);
