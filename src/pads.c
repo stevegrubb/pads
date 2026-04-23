@@ -392,6 +392,7 @@ end_pads(void)
     if (gc.handle) {
         log_message("Closing PCAP Connection");
         pcap_close(gc.handle);
+        pcap_freecode(&gc.filter);
     }
 
     /* Remove PID File */
@@ -407,10 +408,13 @@ end_pads(void)
 #ifndef DISABLE_VENDOR
     end_mac_resolution();
 #endif
+    end_monnet();
 
     /* Garbage Collect GC Variable */
     if (gc.conf_file != NULL)
         bdestroy(gc.conf_file);
+    if (gc.dev != NULL)
+        free(gc.dev);
     if (gc.report_file != NULL)
         bdestroy(gc.report_file);
     if (gc.fifo_file != NULL)

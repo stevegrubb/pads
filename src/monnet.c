@@ -214,3 +214,23 @@ short check_monnet (const struct in_addr ip_addr)
     /* Asset does not fall within a monitored network. */
     return 0;
 }
+
+/* ----------------------------------------------------------
+ * FUNCTION     : end_monnet
+ * DESCRIPTION  : This function will free all the records
+ *              : placed in the monnet data structure.
+ * INPUT        : None!
+ * RETURN       : None!
+ * ---------------------------------------------------------- */
+void end_monnet (void)
+{
+    struct mon_net *next;
+
+    /* Free records in monnet list (mn). */
+    while (mn != NULL) {
+        next = mn->next;
+        free (mn);
+        mn = next;
+    }
+}
+

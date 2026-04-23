@@ -95,6 +95,10 @@ void process_sll (const struct pcap_pkthdr* pkthdr, const u_char* packet)
     /* Extract the sll header from the packet. */
     sllh = (struct sll_header*) packet;
 
+    /* Avoid bogus packets */
+    if (pkthdr->caplen < ETH_HLEN)
+	return;
+
     /* Determine what type of sll packet this is. */
     switch(ntohs(sllh->sll_protocol)) {
 	/* IP */
