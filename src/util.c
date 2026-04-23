@@ -85,7 +85,8 @@ daemonize ()
 {
     pid_t pid;
 
-    printf("[-] Daemonizing...\n");
+    if (!gc.daemon_mode)
+        printf("[-] Daemonizing...\n");
 
     pid = fork();
     if (pid > 0) {

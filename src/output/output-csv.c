@@ -130,7 +130,8 @@ read_report_file (void)
     struct bstrList *lines;
     int i;
 
-    printf("[-] Processing Existing %s\n", bdata(output_csv_conf.filename));
+
+    log_message("[-] Processing Existing %s\n", bdata(output_csv_conf.filename));
 
     /* Open Signature File */
     if ((fp = fopen((char *)bdata(output_csv_conf.filename), "r")) == NULL) {

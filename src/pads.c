@@ -195,6 +195,9 @@ init_pads (void)
     /* Process the command line parameters. */
     process_cmdline(prog_argc, prog_argv);
 
+    if (!gc.daemon_mode)
+        print_header();
+
     /* Initialize Output Module */
     init_output();
 
@@ -523,7 +526,6 @@ main(int argc, char *argv[])
     prog_argv = argv;
 
     /* Main Program */
-    print_header();
     main_pads();
 
     return(0);
