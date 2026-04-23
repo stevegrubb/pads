@@ -129,7 +129,8 @@ int activate_output_plugin (bstring name, bstring args)
 	    /* MATCH! Set record to active and run 'init' function. */
 	    list->active = 1;
 	    if (plugin != NULL && plugin->init != NULL)
-		(*plugin->init)(args);
+		if ((*plugin->init)(args) < 0)
+			return -1;
 	    break;
 	}
 

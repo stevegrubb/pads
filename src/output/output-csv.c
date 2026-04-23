@@ -58,6 +58,7 @@ setup_output_csv (void)
 	if (plugin != NULL)
 	    free(plugin);
 	log_message("warning:  'register_output_plugin' in function 'setup_output_csv' failed.");
+	return -1;
     }
 
     return 0;

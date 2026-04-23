@@ -228,13 +228,13 @@ init_pads (void)
         name = bfromcstr("screen");
         args = bfromcstr("");
         if ((activate_output_plugin(name, args)) == -1)
-            log_message("warning:  'activate_output_plugin' in function 'init_pads' failed.");
+            err_message("Error:  'activate_output_plugin' in function 'init_pads' failed.");
         bdestroy(name);
         bdestroy(args);
         /* output:  csv */
         name = bfromcstr("csv");
         if ((activate_output_plugin(name, gc.report_file)) == -1)
-            log_message("warning:  'activate_output_plugin' in function 'init_pads' failed.");
+            err_message("Error:  'activate_output_plugin' in function 'init_pads' failed.");
         bdestroy(name);
     }
 

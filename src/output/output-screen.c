@@ -55,6 +55,7 @@ setup_output_screen (void)
 	if (plugin != NULL)
 	    free(plugin);
 	log_message("warning:  'register_output_plugin' in function 'setup_output_screen' failed.");
+	return -1;
     }
 
     return 0;

@@ -83,6 +83,7 @@ setup_output_fifo (void)
 	if (plugin != NULL)
 	    free(plugin);
 	log_message("warning:  'register_output_plugin' in function 'setup_output_fifo' failed.");
+	return -1;
     }
 
     return 0;
@@ -109,8 +110,10 @@ init_output_fifo (bstring fifo_file)
     mkfifo ((char *)bdata(fifo_file), 0755);
 
     verbose_message("Open FIFO File\n");
-    if ((output_fifo_conf.file = fopen((char*)bdata(fifo_file), "w+")) == NULL)
+    if ((output_fifo_conf.file = fopen((char*)bdata(fifo_file), "w+")) == NULL){
 	err_message("Unable to open FIFO file (%s)!\n", bdata(fifo_file));
+        return -1;
+    }
 
     return 0;
 }
