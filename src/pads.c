@@ -346,11 +346,11 @@ end_pads(void)
 
     /* Display PCAP Statistics */
     if (!pcap_stats(gc.handle, &pstat)) {
-        log_message("\n");
-        log_message("%d Packets Received\n", pstat.ps_recv);
-        log_message("%d Packets Dropped by Software\n", pstat.ps_drop);
-        log_message("%d Packets Dropped by Interface\n", pstat.ps_ifdrop);
-        log_message("\n");
+        verbose_message("\n");
+        verbose_message("%d Packets Received\n", pstat.ps_recv);
+        verbose_message("%d Packets Dropped by Software\n", pstat.ps_drop);
+        verbose_message("%d Packets Dropped by Interface\n", pstat.ps_ifdrop);
+        verbose_message("\n");
     }
 
     /* Close banner dump file if specifed (-d). */

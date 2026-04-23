@@ -191,8 +191,10 @@ int conf_module_plugin (bstring value, int (*ptrFunc)(bstring, bstring))
                 log_message("warning:  'ptrFunc' in function 'conf_module_processor' failed.");
         } else {
             /* Input processor does not contain an argument. */
-            if (((*ptrFunc)(list->entry[0], bfromcstr(""))) == -1)
+            bstring empty = bfromcstr("");
+            if (((*ptrFunc)(list->entry[0], empty)) == -1)
                 log_message("warning:  'ptrFunc' in function 'conf_module_processor' failed.");
+            bdestroy(empty);
         }
         if (list != NULL)
             bstrListDestroy(list);

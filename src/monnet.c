@@ -32,7 +32,7 @@
 #include "monnet.h"
 #include "util.h"
 
-struct mon_net *mn;
+static struct mon_net *mn = NULL;
 
 /* ----------------------------------------------------------
  * FUNCTION	: parse_networks
