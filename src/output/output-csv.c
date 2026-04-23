@@ -254,10 +254,6 @@ parse_raw_report (bstring line)
     // Clean Up
     if (list != NULL)
 	bstrListDestroy(list);
-    if (service != NULL)
-	bdestroy(service);
-    if (application != NULL)
-	bdestroy(application);
 
     return ret;
 }

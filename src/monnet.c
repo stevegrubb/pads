@@ -87,49 +87,41 @@ void parse_networks (char *cmdline)
     }
 }
 
-/* ----------------------------------------------------------
- * FUNCTION	: init_netmasks
- * DESCRIPTION	: This function will load netmasks into an
- *		: array.
- * INPUT	: 0 - Array
- * RETURN	: None!
- * ---------------------------------------------------------- */
-void init_netmasks (unsigned int nm[33])
-{
-    nm[0] = 0x0;
-    nm[1] = 0x80000000;
-    nm[2] = 0xC0000000;
-    nm[3] = 0xE0000000;
-    nm[4] = 0xF0000000;
-    nm[5] = 0xF8000000;
-    nm[6] = 0xFC000000;
-    nm[7] = 0xFE000000;
-    nm[8] = 0xFF000000;
-    nm[9] = 0xFF800000;
-    nm[10] = 0xFFC00000;
-    nm[11] = 0xFFE00000;
-    nm[12] = 0xFFF00000;
-    nm[13] = 0xFFF80000;
-    nm[14] = 0xFFFC0000;
-    nm[15] = 0xFFFE0000;
-    nm[16] = 0xFFFF0000;
-    nm[17] = 0xFFFF8000;
-    nm[18] = 0xFFFFC000;
-    nm[19] = 0xFFFFE000;
-    nm[20] = 0xFFFFF000;
-    nm[21] = 0xFFFFF800;
-    nm[22] = 0xFFFFFC00;
-    nm[23] = 0xFFFFFE00;
-    nm[24] = 0xFFFFFF00;
-    nm[25] = 0xFFFFFF80;
-    nm[26] = 0xFFFFFFC0;
-    nm[27] = 0xFFFFFFE0;
-    nm[28] = 0xFFFFFFF0;
-    nm[29] = 0xFFFFFFF8;
-    nm[30] = 0xFFFFFFFC;
-    nm[31] = 0xFFFFFFFE;
-    nm[32] = 0xFFFFFFFF;
-}
+static unsigned int netmasks[33] = {
+    0x0,
+    0x80000000,
+    0xC0000000,
+    0xE0000000,
+    0xF0000000,
+    0xF8000000,
+    0xFC000000,
+    0xFE000000,
+    0xFF000000,
+    0xFF800000,
+    0xFFC00000,
+    0xFFE00000,
+    0xFFF00000,
+    0xFFF80000,
+    0xFFFC0000,
+    0xFFFE0000,
+    0xFFFF0000,
+    0xFFFF8000,
+    0xFFFFC000,
+    0xFFFFE000,
+    0xFFFFF000,
+    0xFFFFF800,
+    0xFFFFFC00,
+    0xFFFFFE00,
+    0xFFFFFF00,
+    0xFFFFFF80,
+    0xFFFFFFC0,
+    0xFFFFFFE0,
+    0xFFFFFFF0,
+    0xFFFFFFF8,
+    0xFFFFFFFC,
+    0xFFFFFFFE,
+    0xFFFFFFFF,
+};
 
 /* ----------------------------------------------------------
  * FUNCTION	: add_monnet
@@ -143,11 +135,7 @@ void add_monnet(char *network, char *netmask)
 {
     struct mon_net *rec, *data;
     struct in_addr net_addr;
-    unsigned int netmasks[33];
     int nmask;
-
-    /* Fill netmasks variable.  See init_netmasks in util.c. */
-    init_netmasks(netmasks);
 
     nmask = atoi(netmask);
 

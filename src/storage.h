@@ -54,7 +54,7 @@ int check_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN]);
 void add_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto, bstring service, bstring application, time_t discovered);
 void add_arp_asset (struct in_addr ip_addr, const char *mac_addr, time_t discovered);
 unsigned short get_i_attempts (struct in_addr ip_addr, u_int16_t port, unsigned short proto);
-short update_i_attempts (struct in_addr ip_addr, u_int16_t port, unsigned short proto, unsigned short i_attempts);
+short update_i_attempts (unsigned short i_attempts);
 short update_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto, bstring service, bstring application);
 inline Asset *find_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto);
 Asset *get_asset_pointer (void);

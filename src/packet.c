@@ -232,8 +232,6 @@ void process_tcp (const struct pcap_pkthdr* pkthdr, const u_char* packet, unsign
 		    app = bfromcstr("unknown");
 		    add_asset(ip_src, tcph->th_sport,
 			    IPPROTO_TCP, serv, app, 0);
-		    bdestroy(serv);
-		    bdestroy(app);
 		} else {
 		    /* Record connection for statistical purposes. */
 		    print_stat(ip_src, tcph->th_sport, IPPROTO_TCP);
@@ -295,8 +293,6 @@ void process_icmp (const struct pcap_pkthdr* pkthdr, const u_char* packet, unsig
 	    app = bfromcstr("ICMP");
 	    add_asset(ip_src, 0, IPPROTO_ICMP, serv, app, 0);
 	    print_asset(ip_src, 0, IPPROTO_ICMP);
-	    bdestroy(serv);
-	    bdestroy(app);
 	}
     }
 

@@ -30,7 +30,10 @@
 #include "storage.h"
 #include "output/output.h"
 
-Signature *signature_list;
+static Signature *signature_list = NULL, **tail = NULL;
+
+/* Local Functions */
+static void add_signature (Signature *sig);
 
 /* ----------------------------------------------------------
  * FUNCTION     : init_identification
@@ -40,7 +43,7 @@ Signature *signature_list;
  * RETURN       : -1 - Error
  *              : 0 - Normal Return
  * ---------------------------------------------------------- */
-int init_identification()
+int init_identification(void)
 {
     FILE *fp;
     bstring filename;
@@ -191,25 +194,13 @@ int parse_raw_signature (bstring line, int lineno)
  * RETURN       : 0 - Success
  *              : -1 - Error
  * ---------------------------------------------------------- */
-int add_signature (Signature *sig)
+static void add_signature (Signature *sig)
 {
-    Signature *list;
-
-    if (signature_list == NULL) {
+    if (tail == NULL)
         signature_list = sig;
-    } else {
-        list = signature_list;
-        while (list != NULL) {
-            if (list->next == NULL) {
-                list->next = sig;
-                break;
-            } else {
-                list = list->next;
-            }
-        }
-    }
-
-    return 0;
+    else
+        *tail = sig;
+    tail = &sig->next;
 }
 
 /* ----------------------------------------------------------
@@ -235,12 +226,12 @@ int tcp_identify (struct in_addr ip_addr,
 
     if (i_attempts > 0) {
         i_attempts--;
-        update_i_attempts(ip_addr, port, IPPROTO_TCP, i_attempts);
+        update_i_attempts(i_attempts);
 
         if (pcre_identify(ip_addr, port, IPPROTO_TCP, payload, plen) == 1) {
             /* MATCH! */
             i_attempts = 0;
-            update_i_attempts(ip_addr, port, IPPROTO_TCP, 0);
+            update_i_attempts(0);
         }
 
         /* Print asset if this is the last time to identify it. */

@@ -41,7 +41,6 @@ struct mon_net {
 
 /* PROTOTYPES -------------------------------------- */
 void parse_networks (char *cmdline);
-void init_netmasks (unsigned int nm[33]);
 void add_monnet(char *network, char *netmask);
 short check_monnet (const struct in_addr ip_addr);
 void end_monnet (void);

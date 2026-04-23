@@ -29,8 +29,8 @@
 #include "storage.h"
 #include "mac-resolution.h"
 
-static Asset *asset_list = NULL;
-static ArpAsset *arp_asset_list = NULL;
+static Asset *asset_list = NULL, *current = NULL, **tail = NULL;
+static ArpAsset *arp_asset_list = NULL, **arp_tail = NULL;
 
 /* ----------------------------------------------------------
  * FUNCTION	: check_tcp_asset
@@ -127,8 +127,8 @@ int check_arp_asset (struct in_addr ip_addr, char mac_addr[MAC_LEN])
  * INPUT	: 0 - IP Address
  *		: 1 - Port
  *		: 2 - Protocol
- *		: 3 - Service
- *		: 4 - Application
+ *		: 3 - Service - takes custody of this memory
+ *		: 4 - Application - takes custody of this memory
  *		: 5 - Discovered
  * RETURN	: None!
  * ---------------------------------------------------------- */
@@ -140,15 +140,14 @@ void add_asset (struct in_addr ip_addr,
 		time_t discovered)
 {
     Asset *rec;
-    Asset *list;
 
     /* Assign list to temp structure.  */
     rec = (Asset*)malloc(sizeof(Asset));
     rec->ip_addr.s_addr = ip_addr.s_addr;
     rec->port = port;
     rec->proto = proto;
-    rec->service = bstrcpy(service);
-    rec->application = bstrcpy(application);
+    rec->service = service;
+    rec->application = application;
     rec->next = NULL;
 
     /*
@@ -174,19 +173,11 @@ void add_asset (struct in_addr ip_addr,
     }
 
     /* Find this record's location within linked list.  */
-    if (asset_list == NULL) {
+    if (tail == NULL) 
 	asset_list = rec;
-    } else {
-	list = asset_list;
-	while (list != NULL) {
-	    if (list->next == NULL) {
-		list->next = rec;
-		break;
-	    } else {
-		list = list->next;
-	    }
-	}
-    }
+    else
+	*tail = rec;
+    tail = &rec->next;
 
     return;
 }
@@ -203,7 +194,6 @@ void add_asset (struct in_addr ip_addr,
 void add_arp_asset (struct in_addr ip_addr, const char *mac_addr,
 		    time_t discovered)
 {
-    ArpAsset *list;
     ArpAsset *rec;
     bstring mac_resolved;
 
@@ -233,20 +223,11 @@ void add_arp_asset (struct in_addr ip_addr, const char *mac_addr,
     }
 
     /* Find this record's location within linked list.  */
-    if (arp_asset_list == NULL) {
+    if (arp_tail == NULL) 
 	arp_asset_list = rec;
-    } else {
-	list = arp_asset_list;
-
-	while (list != NULL) {
-	    if (list->next == NULL) {
-		list->next = rec;
-		break;
-	    } else {
-		list = list->next;
-	    }
-	}
-    }
+    else
+	*arp_tail = arp_asset_list;
+    arp_tail = &arp_asset_list->next;
 }
 
 /* ----------------------------------------------------------
@@ -270,6 +251,7 @@ unsigned short get_i_attempts (struct in_addr ip_addr,
 		&& port == rec->port
 		&& proto == rec->proto) {
 	    /* Found! */
+            current = rec;
 	    return rec->i_attempts;
 
 	} else {
@@ -277,13 +259,14 @@ unsigned short get_i_attempts (struct in_addr ip_addr,
 	}
     }
 
+    current = NULL;
     return 0;
 }
 
 /* ----------------------------------------------------------
  * FUNCTION	: update_i_attempts
- * DESCRIPTION	: Updates the i_attempts field for a
- *		: specified asset.
+ * DESCRIPTION	: Updates the i_attempts field of the current
+ *		: asset from previous call to get_i_attempts.
  * INPUT	: 0 - IP Address
  *		: 1 - Port
  *		: 2 - Proto
@@ -291,26 +274,11 @@ unsigned short get_i_attempts (struct in_addr ip_addr,
  * RETURN	: 0 - Success
  *		: 1 - Failure
  * ---------------------------------------------------------- */
-short update_i_attempts (struct in_addr ip_addr,
-			 u_int16_t port,
-			 unsigned short proto,
-			 unsigned short i_attempts)
+short update_i_attempts (unsigned short i_attempts)
 {
-    Asset *rec;
-
-    /* Find asset within linked list.  */
-    rec = asset_list;
-    while (rec != NULL) {
-	if (ip_addr.s_addr == rec->ip_addr.s_addr
-		&& port == rec->port
-		&& proto == rec->proto) {
-	    /* Found! */
-	    rec->i_attempts = i_attempts;
-	    return 0;
-
-	} else {
-	    rec = rec->next;
-	}
+    if (current) {
+        current->i_attempts = i_attempts;
+        return 0;
     }
 
     return 1;

@@ -39,7 +39,6 @@
 /* PROTOTYPES -------------------------------------- */
 int init_identification(void);
 int parse_raw_signature (bstring line, int lineno);
-int add_signature (Signature *sig);
 int tcp_identify (struct in_addr ip_addr, u_int16_t port, char *payload, int plen);
 int pcre_identify (struct in_addr ip_addr, u_int16_t port, unsigned short proto, const char *payload, int plen);
 bstring get_app_name (Signature *sig, const char *payload, int *ovector, int rc);

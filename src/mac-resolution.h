@@ -39,8 +39,6 @@
 
 /* PROTOTYPES -------------------------------------- */
 int init_mac_resolution (void);
-int parse_raw_mac (bstring line);
-int add_vendor (char *mac, char *vendor);
 bstring get_vendor (const char *m);
 void end_mac_resolution (void);
 

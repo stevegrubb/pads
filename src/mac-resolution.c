@@ -34,9 +34,14 @@
 #include "mac-resolution.h"
 #include "util.h"
 
-Vendor *vendor_list = NULL;
+static Vendor *vendor_list = NULL;
+static Vendor **vtail = NULL;
 
-/* ----------------------------------------------------------
+/* Local function prototype */
+static int parse_raw_mac (bstring line);
+static int add_vendor (const char *mac, const char *vendor);
+
+    /* ----------------------------------------------------------
  * FUNCTION     : init_mac_resolution
  * DESCRIPTION  : This file reads in the MAC address table.
  * INPUT        : None
@@ -94,7 +99,7 @@ int init_mac_resolution (void) {
  * RETURN       : 0 - Success
  *              : -1 - Error
  * ---------------------------------------------------------- */
-int parse_raw_mac (bstring line)
+static int parse_raw_mac (bstring line)
 {
     char mac[4];
     char vendor[80];
@@ -125,8 +130,8 @@ int parse_raw_mac (bstring line)
  * INPUT        : 0 - MAC Address (bstring)
  *              : 1 - Vendor (bstring)
  * ---------------------------------------------------------- */
-int add_vendor (char *mac, char *vendor){
-    Vendor *list;
+static int add_vendor (const char *mac, const char *vendor)
+{
     Vendor *rec;
 
     /* Assign data to temporary data structure. */
@@ -136,19 +141,11 @@ int add_vendor (char *mac, char *vendor){
     rec->next = NULL;
 
     /* Place data structure in MAC address list. */
-    if(vendor_list == NULL) {
+    if(vtail == NULL)
         vendor_list = rec;
-    } else {
-        list = vendor_list;
-        while (list != NULL) {
-            if (list->next == NULL) {
-                list->next = rec;
-                break;
-            } else {
-                list = list->next;
-            }
-        }
-    }
+    else
+        *vtail = rec;
+    vtail = &rec->next;
 
     return 0;
 }
