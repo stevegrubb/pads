@@ -268,6 +268,7 @@ init_pads (void)
 static int
 main_pads (void)
 {
+    char pcap_filter[1044];
     /* Initialize */
     if (init_pads() < 0)
         return -1;
@@ -320,8 +321,14 @@ main_pads (void)
 
     /* Compile libpcap filter */
     if (prog_argc > 0) {
-        log_message("Filter:  %s\n", gc.pcap_filter);
-        if (pcap_compile(gc.handle, &gc.filter, gc.pcap_filter, 0, gc.net) == -1) {
+      if(gc.pcap_filter) {
+	strcpy(pcap_filter, "(ip or vlan) and ");
+	strncat(pcap_filter, gc.pcap_filter, 1024);
+      } else {
+	strcpy(pcap_filter, "(ip or vlan)");
+      }
+        log_message("Filter:  %s\n", pcap_filter);
+        if (pcap_compile(gc.handle, &gc.filter, pcap_filter, 0, gc.net) == -1) {
             err_message("Unable to compile pcap filter!  %s", pcap_geterr(gc.handle));
         }
         if (pcap_setfilter(gc.handle, &gc.filter)) {
