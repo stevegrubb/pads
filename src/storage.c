@@ -369,7 +369,7 @@ void end_storage ()
  *		: 2 - Protocol
  * RETURN	: Pointer to Asset
  * ---------------------------------------------------------- */
-inline Asset *
+Asset *
 find_asset (struct in_addr ip_addr, u_int16_t port, unsigned short proto)
 {
     Asset *list;
