@@ -1,0 +1,20 @@
+[Unit]
+Description=Passive Asset Detection System
+After=network.target
+Documentation=man:pads(8)
+
+[Service]
+Type=forking
+PIDFile=/run/pads.pid
+ExecStart=/usr/bin/pads -D -c /etc/pads.conf
+
+### Security Settings ###
+MemoryDenyWriteExecute=true
+LockPersonality=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target
